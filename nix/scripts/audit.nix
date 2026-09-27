@@ -28,7 +28,7 @@
 #
 # The stages, and what each one holds still:
 #
-#   fmt-nix, fmt-md, fmt-web, fmt-scss, fmt-templates
+#   fmt-nix, fmt-md, fmt-web, fmt-prettier, fmt-templates
 #                the five formatters `fmt` runs (nix/scripts/fmt.nix), in
 #                check mode, over the same files (nix/filesets.nix) with
 #                the same settings. A clean `fmt` is what makes these green.
@@ -166,8 +166,8 @@ pkgs.writeShellApplication {
     git ls-files -z ${files.args files.web} \
       | xargs -0 -r biome lint --no-errors-on-unmatched || fail "lint-web"
 
-    stage "fmt-scss: prettier --check (tracked *.scss)"
-    git ls-files -z '*.scss' | xargs -0 -r prettier --check --log-level warn || fail "fmt-scss"
+    stage "fmt-prettier: prettier --check (tracked SCSS and YAML)"
+    git ls-files -z ${files.args files.prettier} | xargs -0 -r prettier --check --log-level warn || fail "fmt-prettier"
 
     stage "fmt-templates: djlint --check (tracked templates)"
     git ls-files -z ${files.args files.templates} \

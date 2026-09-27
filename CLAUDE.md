@@ -147,6 +147,10 @@ typography, layout, and the page staying fast and small. Treat a visual regressi
   reasoning. All five are on the devshell's PATH for editors too. Their settings live in `.editorconfig`, `biome.json`,
   `.djlintrc`, and `nix/mdformat.nix`; which files each owns is `nix/filesets.nix`, shared with the audit.
 - **Keep `.editorconfig` and `.gitignore` current** as the stack grows.
+- **Deployment is GitHub Pages, from CI** (`.github/workflows/pages.yml`). Every push and pull request runs
+  `audit --hook` and builds `nix build .#site` (`nix/site.nix`) - the published site, without drafts, as a derivation -
+  and a push to `main` deploys that build. The full audit, outbound links included, runs weekly and on demand, never in
+  a push's path. Actions are pinned to commit SHAs with the release in a comment; bumping one is a deliberate edit.
 
 ## Source hygiene
 

@@ -6,8 +6,8 @@
 #   * mdformat - `*.md` (nix/mdformat.nix says with which plugins, how wide,
 #                and why content front matter is YAML)
 #   * biome    - the web stack: JS/TS, JSON, plain CSS (biome.json)
-#   * prettier - `*.scss`. Biome does not parse SCSS at all; it refuses the
-#                first `$variable`.
+#   * prettier - `*.scss`, and YAML. Biome does not parse SCSS at all; it
+#                refuses the first `$variable`.
 #   * djlint   - Tera templates under `site/templates/` (.djlintrc). Biome's
 #                HTML formatter reads `{% ... %}` as text and reflows tags
 #                together; djlint knows Jinja-family syntax, including Tera
@@ -40,8 +40,8 @@ pkgs.writeShellApplication {
     echo "==> biome (tracked JS/TS/JSON/CSS)" >&2
     git ls-files -z ${files.args files.web} \
       | xargs -0 -r biome format --write --no-errors-on-unmatched
-    echo "==> prettier (tracked *.scss)" >&2
-    git ls-files -z '*.scss' | xargs -0 -r prettier --write --log-level warn
+    echo "==> prettier (tracked SCSS and YAML)" >&2
+    git ls-files -z ${files.args files.prettier} | xargs -0 -r prettier --write --log-level warn
     echo "==> djlint (tracked templates)" >&2
     # `djlint --reformat` exits 1 whenever it changed a file, so a failure
     # there is not an error by itself; the `--check` that follows is, since

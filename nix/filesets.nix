@@ -31,6 +31,13 @@ in
   ];
   # Tera templates: djlint's.
   templates = [ "site/templates/*.html" ];
+  # What biome cannot parse and prettier can: SCSS, and YAML (the CI
+  # workflow).
+  prettier = [
+    "*.scss"
+    "*.yml"
+    "*.yaml"
+  ];
   # Every source file the ASCII rule covers. Markdown is prose and exempt.
   ascii = web ++ [
     "*.nix"
@@ -39,6 +46,8 @@ in
     ".githooks/*"
     "*.scss"
     "*.html"
+    "*.yml"
+    "*.yaml"
   ];
   # Joined for interpolation into a shell command line; every entry is a
   # quoted literal, so the shell passes the glob to git rather than expanding

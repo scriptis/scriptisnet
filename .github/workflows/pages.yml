@@ -1,0 +1,89 @@
+# Checks every push and pull request with the same gate the pre-commit hook
+# runs, builds the site as the flake builds it, and publishes main to GitHub
+# Pages.
+#
+# Every action is pinned to a full commit SHA, with its release in a comment:
+# a tag can be moved, a SHA cannot. Bumping one is a deliberate edit, like any
+# other pin in this repository.
+#
+# The Pages side is configured in the repository's settings, not here:
+# Settings > Pages > Source must be "GitHub Actions", and the custom domain
+# (scriptis.net) is set there too - with a workflow deploy, a CNAME file in
+# the site is ignored.
+
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # Weekly, for the outbound-link check (the `links` job): links rot without
+  # anyone pushing.
+  schedule:
+    - cron: "17 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  # The hook's tier of the audit - formatters, linters, tests, ASCII, the
+  # site build with warnings fatal, internal links - then the site itself,
+  # as `nix build .#site` makes it, uploaded as the Pages artifact.
+  check:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Audit (hook tier)
+        run: nix run .#audit -- --hook
+      - name: Build
+        # The store path is read-only and a symlink; the artifact wants plain
+        # files.
+        run: |
+          nix build .#site
+          cp -r --dereference result _site
+          chmod -R u+w _site
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  # main only, from the artifact the check built. The one job with write
+  # access, and never cancelled halfway: a deploy in flight finishes before
+  # the next begins.
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # The full audit, outbound links included: weekly and on demand, never on a
+  # push, so a server somewhere else being down cannot block a deploy.
+  links:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Audit (full, with outbound links)
+        run: nix run .#audit
