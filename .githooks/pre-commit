@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# The audit's commit-time tier: `audit --hook` (nix/scripts/audit.nix says
+# which stages that is, and why outbound links are not among them).
+#
+# Not to be skipped with --no-verify. The tier is sized so that nothing needs
+# a hatch - it reads only this tree and takes seconds - so a commit that
+# cannot pass it is a commit that is not finished.
+#
+# Active once `core.hooksPath` points here; the devshell shellHook sets that
+# on entry. To enable manually: git config core.hooksPath .githooks
+#
+# Outside the devshell the hook hops in via `nix develop`; if that fails the
+# commit is blocked rather than waved through - a commit made by a script
+# that never entered the devshell is the likeliest source of an unformatted
+# or broken tree, so a skip here would fire exactly when it helps least.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+# Always through the devshell, never off PATH. An `audit` found on PATH is
+# whatever shell snapshot the committer happens to hold, and a stale one runs
+# the gate as it was when that shell was built - false-failing on a stage the
+# tree has since fixed, or false-passing a stage the tree has since added.
+# The hop through `nix develop` re-resolves the script from the flake as it
+# stands.
+if command -v nix >/dev/null 2>&1; then
+  exec nix develop . -c audit --hook
+fi
+
+echo "pre-commit: no 'nix' on PATH; cannot verify the tree." >&2
+echo "  Enter the devshell (direnv or 'nix develop') and re-commit." >&2
+exit 1

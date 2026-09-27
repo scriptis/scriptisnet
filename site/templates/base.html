@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    {# --bg in _tokens.scss; a meta tag cannot read a custom property. #}
+    <meta name="theme-color" content="#0a0f1f">
+    <title>{% block title %}{{ config.title }}{% endblock title %}</title>
+    {# The faces every page draws first - the wordmark's and the body's -
+       fetched before the stylesheet asks for them. #}
+    <link rel="preload"
+          href="{{ get_url(path='fonts/DejaVuSerif-latin.woff2') }}"
+          as="font"
+          type="font/woff2"
+          crossorigin>
+    <link rel="preload"
+          href="{{ get_url(path='fonts/DejaVuSans-latin.woff2') }}"
+          as="font"
+          type="font/woff2"
+          crossorigin>
+    <link rel="stylesheet"
+          href="{{ get_url(path='main.css', cachebust=true) }}">
+    {# Code-block colors, which Zola writes from the highlighting theme
+       (zola.toml, [markdown.highlighting]). #}
+    <link rel="stylesheet"
+          href="{{ get_url(path='giallo.css', cachebust=true) }}">
+    <link rel="alternate"
+          type="application/atom+xml"
+          title="{{ config.title }}"
+          href="{{ get_url(path='atom.xml', trailing_slash=false) }}">
+  </head>
+  <body>
+    <a class="SkipLink" href="#content">Skip to content</a>
+    {% block header %}
+      <header class="SiteHeader Column">
+        {# The crystal, small, hung before the wordmark and as tall as its
+           line (.Mark), on every page with this header; its hole margin is
+           scaled down to match (crystal.js, RIM and FADE). A page can drop
+           it by overriding the block empty. #}
+        <a class="SiteHeader__Wordmark Wordmark" href="{{ config.base_url }}">
+          {% block mark %}
+            <canvas class="Mark"
+                    data-crystal
+                    data-rim="1"
+                    data-fade="3"
+                    aria-hidden="true"></canvas>
+          {% endblock mark %}
+          {{ config.extra.wordmark }}
+        </a>
+        {% block nav %}
+          {{ <site_nav /> }}
+        {% endblock nav %}
+      </header>
+    {% endblock header %}
+    <main id="content" class="SiteMain Column">
+      {% block content %}
+      {% endblock content %}
+    </main>
+    <footer class="SiteFooter Column">
+      <a class="SiteFooter__Link"
+         href="{{ get_url(path='atom.xml', trailing_slash=false) }}">Atom feed</a>
+    </footer>
+    {# Every page carries a crystal - the hero's or the header's mark - so
+       every page loads its module. #}
+    {% block scripts %}
+      {{ <crystal_script /> }}
+    {% endblock scripts %}
+  </body>
+</html>

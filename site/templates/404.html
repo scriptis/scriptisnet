@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Not found - {{ config.title }}{% endblock title %}
+{% block content %}
+  <header class="PostHeader">
+    <h1 class="PostHeader__Title">Not found</h1>
+  </header>
+  <div class="Prose">
+    <p>
+      Nothing lives at this address. The <a href="{{ config.base_url }}">front page</a> knows what does.
+    </p>
+  </div>
+{% endblock content %}

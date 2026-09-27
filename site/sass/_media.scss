@@ -1,0 +1,129 @@
+// Images in writing: the figure (one image, resized and linked to its
+// original) and the gallery (a pager over several). Both are components in
+// templates/components.html.
+
+.Figure {
+  margin: 0 0 var(--space);
+
+  &__Link {
+    display: block;
+  }
+
+  &__Image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+
+  &__Caption {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  // Fills a height set from outside - a gallery's, which is its tallest
+  // figure's - rather than its own image's. The image area becomes a frame
+  // that takes the spare height, the image centered in it on the sunken
+  // background, letterboxed; the caption keeps one place under every figure.
+  // So a pager changes the picture and nothing else: no figure is shorter,
+  // no caption moves.
+  &--fill {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &--fill &__Link {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-sunken);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  &--fill &__Image {
+    border: 0;
+    border-radius: 0;
+  }
+}
+
+.Gallery {
+  margin: 0 0 var(--space);
+
+  // The strip: one figure per width, snapping to each. Scrollable by hand
+  // with or without script; the scrollbar is hidden where the pager's
+  // buttons stand in for it.
+  // Stretched, so every slide is as tall as the tallest (Figure--fill does
+  // the rest), and the gallery never changes height as it pages.
+  &__Track {
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    border-radius: 4px;
+
+    &:focus-visible {
+      outline-offset: 4px;
+    }
+  }
+
+  &__Slide {
+    flex: 0 0 100%;
+    margin: 0;
+    scroll-snap-align: start;
+  }
+
+  // The thumbnails: one per figure, in a row under the strip, wrapping if
+  // there are more than fit.
+  &__Thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__Thumb {
+    display: block;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    opacity: 0.55;
+    transition:
+      opacity 0.15s ease,
+      border-color 0.15s ease;
+
+    &:hover {
+      opacity: 0.85;
+    }
+
+    &--current {
+      border-color: var(--accent);
+      opacity: 1;
+    }
+  }
+
+  &__ThumbImage {
+    display: block;
+    width: 96px;
+    height: 54px;
+    border-radius: 3px;
+    object-fit: cover;
+  }
+}
+
+// The thumbnails stand in for the scrollbar, script or no script.
+.Gallery__Track {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

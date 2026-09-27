@@ -1,0 +1,150 @@
+{# Components shared by the templates: Tera 2's replacement for macros and
+   shortcodes, callable from any template or content with no import. They
+   see only what is passed to them. `mix` adds the classes of the element
+   that places the component - BEM's mix - to its root. #}
+{# The site's navigation. The site itself needs no entry: the home page is
+   the index of posts, and the wordmark links home from every page. So what
+   is here leads elsewhere. #}
+{% component site_nav(mix="", @config) %}
+<nav class="SiteNav {{ mix }}" aria-label="Site">
+  {# Off-site: marked with an arrow drawn in SVG, since the page's text stays
+     ASCII, and said in words to a screen reader. #}
+  <a class="SiteNav__Link SiteNav__Link--external"
+     href="{{ config.extra.git }}"
+     rel="external">
+    Git
+    <svg class="SiteNav__ExternalMark"
+         viewBox="0 0 12 12"
+         aria-hidden="true"
+         focusable="false">
+      <path d="M4.5 2.5h5v5M9.5 2.5 2.5 9.5" />
+    </svg>
+    <span class="VisuallyHidden">(external site)</span>
+  </a>
+</nav>
+{% endcomponent site_nav %}
+{# A list of posts, newest first as the section sorts them, each its own card:
+   a header with the title and date, then the post's opening - its summary,
+   the Markdown before `<!-- more -->`, or its description when it has no
+   break. #}
+{% component post_list(pages) %}
+<ul class="PostList">
+  {% for post in pages %}
+    <li class="PostList__Item">
+      <article class="PostCard">
+        <header class="PostCard__Header">
+          <h2 class="PostCard__Title">
+            <a class="PostCard__Link" href="{{ post.permalink }}">{{ post.title }}</a>
+          </h2>
+          <time class="PostCard__Date" datetime="{{ post.date }}">{{ post.date | date(format="%Y-%m-%d") }}</time>
+        </header>
+        <div class="PostCard__Content Prose">
+          {% if post.summary %}
+            {{ post.summary | safe }}
+          {% elif post.description %}
+            <p>{{ post.description }}</p>
+          {% endif %}
+          {# The title is the only other link, up in the header; this one
+             sits where a reader finishes the opening. Its accessible name
+             carries the title, so a screen reader's list of links is not
+             three identical "Read more"s. #}
+          <p class="PostCard__More">
+            <a class="PostCard__MoreLink"
+               href="{{ post.permalink }}"
+               aria-label="Read more of {{ post.title }}">Read more...</a>
+          </p>
+        </div>
+      </article>
+    </li>
+  {% endfor %}
+</ul>
+{% endcomponent post_list %}
+{# The crystal's module (static/js/crystal/), which starts every
+   <canvas data-crystal> on the page; a page with one includes this once. #}
+{% component crystal_script() %}
+<script type="module"
+        src="{{ get_url(path='js/crystal/crystal.js', cachebust=true) }}"></script>
+{% endcomponent crystal_script %}
+{# One image from the page's own bundle (the directory its index.md is in),
+   as a figure: resized to the column at 1x and 2x, as WebP, with its real
+   width and height so nothing jumps as it loads, lazily; linked to the
+   original; captioned if `caption` is given.
+
+   Every tag trims its whitespace ({%- -%}), and the markup has no blank
+   lines, because this is called from Markdown: a blank line would end the
+   HTML block, and the indented line after it would become a code block. #}
+{% component figure(src, alt, caption="", mix="", id="", @page) -%}
+{%- set path = page.colocated_path ~ src -%}
+{%- set meta = get_image_metadata(path=path) -%}
+{%- set one = resize_image(path=path, width=800 if meta.width > 800 else meta.width, op="fit_width", format="webp", quality=85) -%}
+{%- set two = resize_image(path=path, width=1600 if meta.width > 1600 else meta.width, op="fit_width", format="webp", quality=85) -%}
+<figure class="Figure {{ mix }}"{% if id %} id="{{ id }}"{% endif %}>
+  <a class="Figure__Link" href="{{ get_url(path='@/' ~ path) }}">
+    <img class="Figure__Image"
+         src="{{ one.url }}"
+         srcset="{{ one.url }} {{ one.width }}w,
+                 {{ two.url }} {{ two.width }}w"
+         sizes="(max-width: 832px) calc(100vw - 32px), 800px"
+         width="{{ one.width }}"
+         height="{{ one.height }}"
+         alt="{{ alt }}"
+         loading="lazy"
+         decoding="async">
+  </a>
+  {%- if caption -%}
+    <figcaption class="Figure__Caption">{{ caption }}</figcaption>
+  {%- endif -%}
+</figure>
+{%- endcomponent figure %}
+{# A pager over several figures from the page's bundle: one at a time, with
+   a row of thumbnails under it to pick from.
+
+   Called by name - {{ <gallery name="blocks" /> }} - and described in the
+   page's front matter, under extra.galleries.<name>: `label`, which names
+   it to a screen reader (the name, if not), and `items`, a list of `src`,
+   `alt` and optionally `caption` (the alt text, if not). The list lives in
+   front matter and not in the call because a call in Markdown must stay
+   valid HTML for the formatter to leave it alone: an attribute holding a
+   list is not, and mdformat escapes the whole call into text.
+
+   It works without script: the track is a strip that scrolls sideways and
+   snaps to each figure, and each thumbnail is a link to its figure's
+   anchor. static/js/gallery.js makes a thumbnail scroll the strip in place,
+   rather than jump the page, and marks the one in view as current. #}
+{% component gallery(name, @page) -%}
+{%- set gallery = page.extra.galleries[name] -%}
+{%- set items = gallery.items -%}
+{%- set label = gallery.label | default(value=name) -%}
+{%- set key = "gallery-" ~ name | slugify -%}
+<section class="Gallery"
+         data-gallery
+         aria-roledescription="gallery"
+         aria-label="{{ label }}">
+  <div class="Gallery__Track" data-gallery-track tabindex="0">
+    {%- for item in items -%}
+      {{ <figure src={item.src} alt={item.alt} caption={item.caption | default(value=item.alt) } mix="Gallery__Slide Figure--fill" id={key ~ "-" ~ loop.index} /> }}
+    {%- endfor -%}
+  </div>
+  <ul class="Gallery__Thumbs">
+    {%- for item in items -%}
+      {%- set thumb = resize_image(path=page.colocated_path ~ item.src, width=192, height=108, op="fill", format="webp", quality=80) -%}
+      <li>
+        <a class="Gallery__Thumb{% if loop.first %} Gallery__Thumb--current{% endif %}"
+           href="#{{ key }}-{{ loop.index }}"
+           data-gallery-thumb
+           {% if loop.first %}aria-current="true"{% endif %}>
+          <img class="Gallery__ThumbImage"
+               src="{{ thumb.url }}"
+               width="96"
+               height="54"
+               alt="{{ item.alt }}"
+               loading="lazy"
+               decoding="async">
+        </a>
+      </li>
+    {%- endfor -%}
+  </ul>
+</section>
+<script type="module"
+        src="{{ get_url(path='js/gallery.js', cachebust=true) }}"></script>
+{%- endcomponent gallery %}

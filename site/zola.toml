@@ -1,0 +1,47 @@
+# Zola's configuration; the full reference for the pinned version is
+# docs/content/documentation/getting-started/configuration.md in the Zola
+# source (the `zola` skill says how to open it).
+base_url = "https://scriptis.net"
+title = "scriptis.net"
+description = ""
+default_language = "en-US"
+
+# The theme is this site's own, in templates/ and sass/; no `theme` key.
+compile_sass = true
+
+# Tests sit beside the modules they check; they are not part of the site.
+ignored_static = ["**/*.test.js"]
+
+generate_feeds = true
+feed_filenames = ["atom.xml"]
+
+[markdown]
+# Footnotes gathered at the end of a post with back-references, rather than
+# left where they are defined.
+bottom_footnotes = true
+
+# Code blocks, highlighted at build time by Zola's Giallo from TextMate
+# grammars. The theme is the author's editor's: the VSCodium theme Stylix
+# generates from the base16 catppuccin-frappe scheme, vendored as-is except
+# for its `name`, which is changed so it cannot be taken for Giallo's own
+# (and differently mapped) catppuccin-frappe. To follow a change of editor
+# theme, replace the file.
+[markdown.highlighting]
+extra_themes = ["highlighting/stylix.json"]
+theme = "stylix-catppuccin-frappe"
+# Classes, not inline colors: Zola writes the theme once to /giallo.css, the
+# page's markup stays free of style attributes, and the site's own code-block
+# panel (.Prose pre) keeps its background over the theme's.
+style = "class"
+# A misspelled fence language fails the build, rather than shipping that
+# block uncolored.
+error_on_missing_language = true
+
+[extra]
+# The name as the site sets it - the wordmark in every header - where
+# `title` above is the name as feeds and browser tabs carry it.
+wordmark = "scriptis"
+# Under the wordmark on the home page, at a quarter its size.
+tagline = "inside the mind of the world's worst programmer"
+# The code forge, linked from the nav as an external site.
+git = "https://git.scriptis.net"

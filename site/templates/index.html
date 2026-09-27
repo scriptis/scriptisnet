@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{# The home page: the crystal (static/js/crystal/) on the left, the wordmark
+   and tagline beside it, in place of the slim header every other page has. #}
+{% block header %}
+  <header class="Hero Column">
+    {# The crystal hung before the wordmark, as on every other page's header
+       but at the hero's size, with a hole margin to match (crystal.js, RIM
+       and FADE). Decorative, so hidden from assistive technology, and the
+       heading's name is the wordmark alone; without WebGL2 the canvas stays
+       empty and transparent. data-crystal is crystal.js's handle. #}
+    <h1 class="Hero__Wordmark Wordmark">
+      <canvas class="Mark"
+              data-crystal
+              data-rim="2"
+              data-fade="6"
+              aria-hidden="true"></canvas>
+      {{ config.extra.wordmark }}
+    </h1>
+    <p class="Hero__Tagline">{{ config.extra.tagline }}</p>
+    {{ <site_nav mix="Hero__Nav" /> }}
+  </header>
+{% endblock header %}
+{% block content %}
+  {% if section.content %}<div class="HomeIntro Prose">{{ section.content | safe }}</div>{% endif %}
+  {% set blog = get_section(path="blog/_index.md") %}
+  {{ <post_list pages={blog.pages} /> }}
+{% endblock content %}

@@ -1,0 +1,36 @@
+// The vendored faces, from site/static/fonts/, which `nix run .#vendor-fonts`
+// rebuilds from the pinned nixpkgs (nix/scripts/vendor-fonts.nix says how and
+// why they are cut the way they are). The licenses travel beside them.
+
+// The subsets' range, so a browser fetches a file only for text it can set
+// and falls back down the stack for anything else. It is the script's list;
+// change the two together.
+$latin:
+  U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+  U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+
+@mixin face($family, $file, $weight: 400, $style: normal) {
+  @font-face {
+    font-family: $family;
+    font-style: $style;
+    font-weight: $weight;
+    // Text in the fallback face first, swapped once the file is in: nothing
+    // is ever invisible while a face loads.
+    font-display: swap;
+    src: url("fonts/#{$file}-latin.woff2") format("woff2");
+    unicode-range: $latin;
+  }
+}
+
+// Display: the wordmark and headings, one weight.
+@include face("DejaVu Serif", "DejaVuSerif");
+
+// Body: all four styles, so bold and italic are the face's own and never
+// synthesized. DejaVu's slanted styles are obliques; they answer for italic.
+@include face("DejaVu Sans", "DejaVuSans");
+@include face("DejaVu Sans", "DejaVuSans-Bold", 700);
+@include face("DejaVu Sans", "DejaVuSans-Oblique", 400, italic);
+@include face("DejaVu Sans", "DejaVuSans-BoldOblique", 700, italic);
+
+// Code.
+@include face("Fira Code", "FiraCode");

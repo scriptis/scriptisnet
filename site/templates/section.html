@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ section.title }} - {{ config.title }}{% endblock title %}
+{% block content %}
+  <header class="PostHeader">
+    <h1 class="PostHeader__Title">{{ section.title }}</h1>
+  </header>
+  {% if section.content %}<div class="Prose">{{ section.content | safe }}</div>{% endif %}
+  {{ <post_list pages={section.pages} /> }}
+{% endblock content %}

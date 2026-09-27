@@ -1,0 +1,16 @@
+root = true
+
+[*]
+max_line_length = 100
+insert_final_newline = true
+trim_trailing_whitespace = true
+end_of_line = lf
+charset = utf-8
+
+[*.{toml,nix,yaml,yml,scss,css,html,js,mjs,cjs,jsx,ts,mts,tsx,json,jsonc}]
+indent_style = space
+indent_size = 2
+
+# mdformat wraps at 120 (nix/mdformat.nix).
+[*.md]
+max_line_length = 120

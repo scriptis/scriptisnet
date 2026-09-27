@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.nix|*.toml|*.sh|*.json|*.jsonc|*.scss|*.css|*.html|*.js|*.mjs|*.cjs|*.jsx|*.ts|*.mts|*.tsx) exec \"${CLAUDE_PROJECT_DIR:-.}/.claude/scripts/strip-non-ascii.sh\" \"$f\";; *) exit 0;; esac",
+            "statusMessage": "Keeping source ASCII"
+          }
+        ]
+      }
+    ]
+  }
+}

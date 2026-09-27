@@ -1,0 +1,34 @@
+// The home page: the hero - the wordmark at full size with the crystal hung
+// before it (.Mark), the tagline and the nav under it - and the introduction
+// below.
+
+.Hero {
+  // The wordmark's size, which the tagline takes a quarter of.
+  --hero-size: clamp(2rem, 8vw, 4.5rem);
+
+  padding-block: calc(var(--space) * 3) calc(var(--space) * 2);
+
+  &__Wordmark {
+    font-size: var(--hero-size);
+    line-height: 1;
+  }
+
+  &__Tagline {
+    margin: 0.5em 0 0;
+    font-family: var(--font-display);
+    // A quarter of the wordmark, but never under the site's smallest text:
+    // on a phone the wordmark is at its 2rem floor, and a quarter of that
+    // is 8px.
+    font-size: max(0.875rem, calc(var(--hero-size) / 4));
+    line-height: 1.25;
+    color: var(--text-muted);
+  }
+
+  &__Nav {
+    margin-top: 1.25rem;
+  }
+}
+
+.HomeIntro {
+  margin-bottom: calc(var(--space) * 2);
+}

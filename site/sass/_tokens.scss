@@ -1,0 +1,42 @@
+// The design tokens: every color, face and measure the theme uses, as custom
+// properties on :root. The site is dark-only, by design rather than by
+// preference query, so there is one set and no light twin.
+:root {
+  color-scheme: dark;
+
+  // Dark blues, from the page's floor up through raised surfaces and rules.
+  // --bg is repeated in base.html's theme-color meta, which cannot read a
+  // custom property.
+  --bg: #0a0f1f;
+  --bg-raised: #111933;
+  --bg-sunken: #070b17;
+  --line: #1f2b4d;
+
+  // Text, at contrast against --bg of about 14:1 (--text) and 7:1
+  // (--text-muted), so even the quiet text clears WCAG AA with room.
+  --text: #d5ddf0;
+  --text-muted: #8a98b8;
+
+  // Links in a lighter blue; the accent is the crystal's violet, for the few
+  // places that should echo it.
+  --link: #8cb2ff;
+  --link-hover: #bcd0ff;
+  --accent: #b08cff;
+
+  // Faces, all vendored (_fonts.scss): DejaVu Serif for display - the
+  // wordmark and headings - DejaVu Sans to match it for body text, and Fira
+  // Code for code. The rest of each stack is where a character outside the
+  // Latin subsets falls.
+  --font-display: "DejaVu Serif", ui-serif, Georgia, serif;
+  --font-body: "DejaVu Sans", system-ui, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+
+  // The content column, and the gutter that keeps it off a phone's edges.
+  --column: 800px;
+  --gutter: 16px;
+
+  // Type scale and rhythm.
+  --text-size: 1.125rem;
+  --leading: 1.65;
+  --space: 1.5rem;
+}

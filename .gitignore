@@ -1,0 +1,15 @@
+# Zola's build output.
+/site/public/
+# resize_image's cache: Zola writes resized copies into the source tree.
+/site/static/processed_images/
+
+/result
+/result-*
+.direnv/
+.envrc.local
+.claude/worktrees/
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+.DS_Store
+*.swp
+*~
